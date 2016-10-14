@@ -45,12 +45,11 @@ class Rectangle:
 
 
 def block(height, width, depth):
-    base = Point(0, 0, 0)
     bottom = Rectangle(
-        base,
-        base + Point(0, 0, depth),
-        base + Point(width, 0, depth),
-        base + Point(width, 0, 0)
+        Point(0, 0, 0),
+        Point(0, 0, depth),
+        Point(width, 0, depth),
+        Point(width, 0, 0)
     )
 
     height_added = Point(0, height, 0)
