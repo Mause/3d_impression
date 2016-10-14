@@ -14,7 +14,8 @@ rad = lambda t: t * pi / 180
 Point = lambda x, y, z: np.array([x, y, z])
 Point.zero = Point(0, 0, 0)
 Line = lambda start, end: np.array([start, end])
-Line.zero = Line(Point.zero, Point.zero)
+Line.as_ = lambda single: Line(single, single)
+Line.zero = Line.as_(Point.zero)
 
 
 class Rectangle:
@@ -43,6 +44,26 @@ class Rectangle:
         return Rectangle(single, single, single, single)
 
 
+def block(height, width, depth):
+    base = Point(0, 0, 0)
+    bottom = Rectangle(
+        base,
+        base + Point(0, 0, depth),
+        base + Point(width, 0, depth),
+        base + Point(width, 0, 0)
+    )
+
+    height_added = Point(0, height, 0)
+    top = bottom + Rectangle.as_(height_added)
+
+    yield from bottom
+    yield from top
+    yield from (
+        Line(tp, bp)
+        for tp, bp in zip(bottom.points, top.points)
+    )
+
+
 def get_lines(blocks):
     WIDTH, DEPTH = 1, 1
     for x, row in enumerate(blocks):
@@ -51,23 +72,8 @@ def get_lines(blocks):
             z *= DEPTH
             y *= 10
 
-            base = Point(x, 0, z)
-            bottom = Rectangle(
-                base,
-                base + Point(0, 0, DEPTH),
-                base + Point(WIDTH, 0, DEPTH),
-                base + Point(WIDTH, 0, 0)
-            )
-
-            height_added = Point(0, y, 0)
-            top = bottom + Rectangle.as_(height_added)
-
-            yield from bottom
-            yield from top
-            yield from (
-                Line(tp, bp)
-                for tp, bp in zip(bottom.points, top.points)
-            )
+            for line in block(y, WIDTH, DEPTH):
+                yield line + Line.as_(Point(x, 0, z))
 
 
 def rgb_to_decimal(*rgb):
